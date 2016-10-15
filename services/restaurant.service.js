@@ -25,7 +25,7 @@ function authenticate(email, password) {
 
         if (user && bcrypt.compareSync(password, user.hash)) {
             // authentication successful
-            deferred.resolve(jwt.sign({ sub: user._id }, config.secret));
+            deferred.resolve(jwt.sign({token: user._id}, config.secret));
         } else {
             // authentication failed
             deferred.resolve();
@@ -35,9 +35,9 @@ function authenticate(email, password) {
     return deferred.promise;
 }
 
-function getById(_id) {
+function getById(bearer) {
     var deferred = Q.defer();
-
+    _id = jwt.verify(bearer, config.secret).token
     db.restaurants.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -89,9 +89,9 @@ function create(userParam) {
     return deferred.promise;
 }
 
-function update(_id, userParam) {
+function update(bearer, userParam) {
     var deferred = Q.defer();
-
+    _id = jwt.verify(bearer, config.secret).token
     // validation
     db.restaurants.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
@@ -116,14 +116,18 @@ function update(_id, userParam) {
     });
 
     function updateRestaurant() {
-        var set = {
-            location: userParam.location
-        };
+        var set = {};
 
         // update password if it was entered
         // if (userParam.password) {
         //     set.hash = bcrypt.hashSync(userParam.password, 10);
         // }
+        if(userParam.menu && userParam.menu.length > 0){
+            set.menu = userParam.menu;
+        }
+        if(userParam.location){
+            set.location = userParam.location;
+        }
 
         db.restaurants.update(
             { _id: mongo.helper.toObjectID(_id) },

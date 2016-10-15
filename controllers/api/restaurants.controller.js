@@ -1,5 +1,7 @@
 ﻿var config = require('config.json');
 var express = require('express');
+var multer  = require('multer')
+var upload = multer({ dest: 'public/images' })
 var router = express.Router();
 var restaurantService = require('services/restaurant.service');
 
@@ -9,6 +11,7 @@ router.post('/register', registerRestaurant);
 router.get('/current', getCurrentRestaurant);
 router.put('/:_id', updateRestaurant);
 router.delete('/:_id', deleteRestaurant);
+router.post('/uploadImages', upload.array('fileUpload', 5), uploadImages);
 
 module.exports = router;
 
@@ -30,7 +33,6 @@ function authenticateRestaurant(req, res) {
 }
 
 function registerRestaurant(req, res) {
-    console.log(req);
     restaurantService.create(req.body)
         .then(function () {
             res.sendStatus(200);
@@ -41,7 +43,8 @@ function registerRestaurant(req, res) {
 }
 
 function getCurrentRestaurant(req, res) {
-    restaurantService.getById(req.restaurant.sub)
+    var bearer = req.headers["authorization"].substring(req.headers["authorization"].indexOf(" ") + 1);
+    restaurantService.getById(bearer)
         .then(function (restaurant) {
             if (restaurant) {
                 res.send(restaurant);
@@ -55,13 +58,8 @@ function getCurrentRestaurant(req, res) {
 }
 
 function updateRestaurant(req, res) {
-    var restaurantId = req.restaurant.sub;
-    if (req.params._id !== restaurantId) {
-        // can only update own account
-        return res.status(401).send('You can only update your own account');
-    }
-
-    restaurantService.update(restaurantId, req.body)
+    var bearer = req.headers["authorization"].substring(req.headers["authorization"].indexOf(" ") + 1);
+    restaurantService.update(bearer, req.body)
         .then(function () {
             res.sendStatus(200);
         })
@@ -84,4 +82,10 @@ function deleteRestaurant(req, res) {
         .catch(function (err) {
             res.status(400).send(err);
         });
+}
+
+
+function uploadImages(req, res) {
+console.log(req.files);
+res.sendStatus(200);
 }

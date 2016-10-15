@@ -20,6 +20,7 @@ app.use('/loginUser', require('./controllers/login.controller.user'));
 app.use('/registerUser', require('./controllers/register.controller.user'));
 app.use('/api/users', require('./controllers/api/users.controller'));
 
+
 app.use('/loginRestaurant', require('./controllers/login.controller.restaurant'));
 app.use('/registerRestaurant', require('./controllers/register.controller.restaurant'));
 app.use('/api/restaurants', require('./controllers/api/restaurants.controller'));
