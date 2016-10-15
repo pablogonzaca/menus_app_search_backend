@@ -6,7 +6,10 @@ var bodyParser = require('body-parser');
 var expressJwt = require('express-jwt');
 var router = express.Router();
 var config = require('config.json');
+var cors = require('cors');
 
+var app = express();
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(session({ secret: config.secret, resave: false, saveUninitialized: true }));

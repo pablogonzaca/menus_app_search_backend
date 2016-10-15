@@ -9,6 +9,7 @@ router.post('/register', registerUser);
 router.get('/current', getCurrentUser);
 router.put('/:_id', updateUser);
 router.delete('/:_id', deleteUser);
+router.post('/comment',commentUser);
 
 module.exports = router;
 
@@ -82,4 +83,7 @@ function deleteUser(req, res) {
         .catch(function (err) {
             res.status(400).send(err);
         });
+}
+function commentUser(req,res){
+	
 }

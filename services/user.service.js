@@ -14,6 +14,7 @@ service.getById = getById;
 service.create = create;
 service.update = update;
 service.delete = _delete;
+service.comment = comment;
 
 module.exports = service;
 
@@ -58,7 +59,7 @@ function create(userParam) {
 
     // validation
     db.users.findOne(
-        { username: userParam.username },
+        { name: userParam.username },
         function (err, user) {
             if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -153,4 +154,7 @@ function _delete(_id) {
         });
 
     return deferred.promise;
+}
+function comment(comment, id_Restaurante){
+	db.users.insert
 }
