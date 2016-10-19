@@ -18,9 +18,11 @@ service.delete = _delete;
 module.exports = service;
 
 function authenticate(email, password) {
+
     var deferred = Q.defer();
 
     db.restaurants.findOne({ email: email }, function (err, user) {
+
         if (err) deferred.reject(err.name + ': ' + err.message);
 
         if (user && bcrypt.compareSync(password, user.hash)) {

@@ -30,7 +30,6 @@ function authenticateRestaurant(req, res) {
 }
 
 function registerRestaurant(req, res) {
-    console.log(req);
     restaurantService.create(req.body)
         .then(function () {
             res.sendStatus(200);
