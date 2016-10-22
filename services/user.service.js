@@ -22,13 +22,11 @@ function authenticate(username, password) {
 
     db.users.findOne({ email: username }, function (err, user) {
 
-        console.log(user);
-
         if (err) deferred.reject(err.name + ': ' + err.message);
 
         if (user && bcrypt.compareSync(password, user.hash)) {
             // authentication successful
-            deferred.resolve(jwt.sign({ sub: user._id }, config.secret));
+            deferred.resolve(jwt.sign({token: user._id}, config.secret));
         } else {
             // authentication failed
             deferred.resolve();
@@ -40,7 +38,7 @@ function authenticate(username, password) {
 
 function getById(_id) {
     var deferred = Q.defer();
-
+    _id = jwt.verify(bearer, config.secret).token
     db.users.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -94,7 +92,7 @@ function create(userParam) {
 
 function update(_id, userParam) {
     var deferred = Q.defer();
-
+    _id = jwt.verify(bearer, config.secret).token;
     // validation
     db.users.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);

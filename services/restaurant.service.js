@@ -18,7 +18,6 @@ service.delete = _delete;
 module.exports = service;
 
 function authenticate(email, password) {
-
     var deferred = Q.defer();
 
     db.restaurants.findOne({ email: email }, function (err, user) {
@@ -93,7 +92,7 @@ function create(userParam) {
 
 function update(bearer, userParam) {
     var deferred = Q.defer();
-    _id = jwt.verify(bearer, config.secret).token
+    _id = jwt.verify(bearer, config.secret).token;
     // validation
     db.restaurants.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);

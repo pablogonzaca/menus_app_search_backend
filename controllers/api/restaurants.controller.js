@@ -1,7 +1,7 @@
 ﻿var config = require('config.json');
 var express = require('express');
-var multer  = require('multer')
-var upload = multer({ dest: 'public/images' })
+var multer = require('multer')
+var upload = multer({dest: 'public/images'})
 var router = express.Router();
 var restaurantService = require('services/restaurant.service');
 
@@ -21,7 +21,7 @@ function authenticateRestaurant(req, res) {
             if (token) {
                 // authentication successful
                 req.session.token = token;
-                res.send({ token: token });
+                res.send({token: token});
             } else {
                 // authentication failed
                 res.status(401).send('Restaurant email or password is incorrect');
@@ -86,6 +86,6 @@ function deleteRestaurant(req, res) {
 
 
 function uploadImages(req, res) {
-console.log(req.files);
-res.sendStatus(200);
+    console.log(req.files);
+    res.sendStatus(200);
 }
