@@ -4,8 +4,9 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var Q = require('q');
 var mongo = require('mongoskin');
-var db = mongo.db(config.connectionString, { native_parser: true });
+var db = mongo.db(config.connectionString, {native_parser: true});
 db.bind('users');
+db.bind('restaurants');
 
 var service = {};
 
@@ -15,13 +16,15 @@ service.create = create;
 service.update = update;
 service.delete = _delete;
 service.getRestaurants = getRestaurants;
+service.getMenu = getMenu;
+service.comment = comment;
 
 module.exports = service;
 
 function authenticate(username, password) {
     var deferred = Q.defer();
 
-    db.users.findOne({ email: username }, function (err, user) {
+    db.users.findOne({email: username}, function (err, user) {
 
         if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -51,22 +54,43 @@ function getById(bearer) {
             deferred.resolve();
         }
     });
-
     return deferred.promise;
 }
-
 
 function getRestaurants(params) {
     var deferred = Q.defer();
     //_id = jwt.verify(bearer, config.secret).token;
+    db.restaurants.find({
+        'location.latitude': {$gt: parseFloat(params.lat) - 0.010, $lt: parseFloat(params.lat) + 0.010},
+        'location.longitude': {$gt: parseFloat(params.lng) - 0.010, $lt: parseFloat(params.lng) + 0.010}
+    })
+        .toArray(function (err, restaurants) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            if (restaurants) {
+                deferred.resolve(restaurants);
+            } else {
+                deferred.resolve();
+            }
+        });
 
+    return deferred.promise;
+}
 
-    console.log("Buscar restaurantes cercanos...");
-    console.log(params);
+function getMenu(params) {
+    var deferred = Q.defer();
+    //_id = jwt.verify(bearer, config.secret).token;
 
-    db.resturants.findById(_id, function (err, user) {
-    //
-    //});
+    db.restaurants.findById(params.id, function (err, restaurant) {
+        if (err) deferred.reject(err.name + ': ' + err.message);
+
+        if (restaurant) {
+            // return user (without hashed password)
+            deferred.resolve(restaurant);
+        } else {
+            // user not found
+            deferred.resolve();
+        }
+    });
 
     return deferred.promise;
 }
@@ -76,7 +100,7 @@ function create(userParam) {
 
     // validation
     db.users.findOne(
-        { username: userParam.name },
+        {username: userParam.name},
         function (err, user) {
             if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -117,7 +141,7 @@ function update(_id, userParam) {
         if (user.username !== userParam.username) {
             // username has changed so check if the new username is already taken
             db.users.findOne(
-                { username: userParam.username },
+                {username: userParam.username},
                 function (err, user) {
                     if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -147,8 +171,8 @@ function update(_id, userParam) {
         }
 
         db.users.update(
-            { _id: mongo.helper.toObjectID(_id) },
-            { $set: set },
+            {_id: mongo.helper.toObjectID(_id)},
+            {$set: set},
             function (err, doc) {
                 if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -163,7 +187,7 @@ function _delete(_id) {
     var deferred = Q.defer();
 
     db.users.remove(
-        { _id: mongo.helper.toObjectID(_id) },
+        {_id: mongo.helper.toObjectID(_id)},
         function (err) {
             if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -172,3 +196,13 @@ function _delete(_id) {
 
     return deferred.promise;
 }
+
+function comment(commentParam) {
+    var deferred = Q.defer();
+    db.comment.insert(commentParam, function (err) {
+        if (err) deferred.reject(err.name + ': ' + err.message)
+        deferred.resolve();
+    });
+    return deferred.promise;
+}
+
