@@ -14,6 +14,7 @@ service.getById = getById;
 service.create = create;
 service.update = update;
 service.delete = _delete;
+service.getRestaurants = getRestaurants;
 
 module.exports = service;
 
@@ -36,9 +37,9 @@ function authenticate(username, password) {
     return deferred.promise;
 }
 
-function getById(_id) {
+function getById(bearer) {
     var deferred = Q.defer();
-    _id = jwt.verify(bearer, config.secret).token
+    _id = jwt.verify(bearer, config.secret).token;
     db.users.findById(_id, function (err, user) {
         if (err) deferred.reject(err.name + ': ' + err.message);
 
@@ -50,6 +51,22 @@ function getById(_id) {
             deferred.resolve();
         }
     });
+
+    return deferred.promise;
+}
+
+
+function getRestaurants(params) {
+    var deferred = Q.defer();
+    //_id = jwt.verify(bearer, config.secret).token;
+
+
+    console.log("Buscar restaurantes cercanos...");
+    console.log(params);
+
+    db.resturants.findById(_id, function (err, user) {
+    //
+    //});
 
     return deferred.promise;
 }

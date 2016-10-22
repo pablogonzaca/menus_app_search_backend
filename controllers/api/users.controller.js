@@ -7,6 +7,7 @@ var userService = require('services/user.service');
 router.post('/authenticate', authenticateUser);
 router.post('/register', registerUser);
 router.get('/current', getCurrentUser);
+router.get('/restaurants/:lat/:long', getRestaurants);
 router.put('/:_id', updateUser);
 router.delete('/:_id', deleteUser);
 
@@ -40,7 +41,23 @@ function registerUser(req, res) {
 }
 
 function getCurrentUser(req, res) {
-    userService.getById(req.user.sub)
+    var bearer = req.headers["authorization"].substring(req.headers["authorization"].indexOf(" ") + 1);
+    userService.getById(bearer)
+        .then(function (user) {
+            if (user) {
+                res.send(user);
+            } else {
+                res.sendStatus(404);
+            }
+        })
+        .catch(function (err) {
+            res.status(400).send(err);
+        });
+}
+
+function getRestaurants(req, res) {
+    var bearer = req.headers["authorization"].substring(req.headers["authorization"].indexOf(" ") + 1);
+    userService.getRestaurants(req.params)
         .then(function (user) {
             if (user) {
                 res.send(user);
